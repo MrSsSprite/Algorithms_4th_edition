@@ -133,3 +133,28 @@ At the end, the `DoublingStackOfStrings` holds merely one `it`.
 > ```terminal
 > ((1 + 2) * ((3 - 4) * (5 - 6)))
 > ```
+
+## 1.5. Case Study: Union Find
+### Problem Statement: Dyamic Connectivity
+Given a set of connection commands, which build equivalence relations that are:
+- Reflexive: `p` is connected to `p`.
+- Symmetric: If `p` is connected to `q`, then `q` is connected to `p`.
+- Transitive: If `p` is connected to `q` and `q` is connected to `r`, then `p` is 
+  connected to `r`.
+Union Find (`UF`) programs are develop to recognize if two given points (or sites) 
+are connected.
+
+### Implementations
+The General Interface for Union Find
+[union_find.h](union_find/union_find.h)
+
+#### Quick-Find
+One of the most intuitive implementation would be to construct an array so that every 
+site can be related to an index and then ensure that all the sites in a component (a set 
+of sites connected together) holds the same index. This approach is called Quick-Find 
+since the `find` function always take constant time.
+[Quick Find Implementation](union_find/quick_find.c)
+
+***Analysis***: The `find` operation takes merely constant time, while the time complexity
+of each `union` operation is proportional to data size (i.e., *O(n)*). Therefore, the 
+quick find implementation is not considered practical.
