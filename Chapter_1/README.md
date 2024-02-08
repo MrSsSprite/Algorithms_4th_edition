@@ -141,6 +141,7 @@ Given a set of connection commands, which build equivalence relations that are:
 - Symmetric: If `p` is connected to `q`, then `q` is connected to `p`.
 - Transitive: If `p` is connected to `q` and `q` is connected to `r`, then `p` is 
   connected to `r`.
+
 Union Find (`UF`) programs are develop to recognize if two given points (or sites) 
 are connected.
 
@@ -158,3 +159,20 @@ since the `find` function always take constant time.
 ***Analysis***: The `find` operation takes merely constant time, while the time complexity
 of each `union` operation is proportional to data size (i.e., *O(n)*). Therefore, the 
 quick find implementation is not considered practical.
+
+#### Quick-Union
+The next method is Quick Union, which is like a reciprocal to Quick-Find. This method, 
+on the contrary, prioritizes the speed of `union` operation. This method uses the same 
+data structure as Quick-Find; the interpretation of the `id` array is, however, 
+different. The `id` array in Quick-Union is used to represent the "parent" of this site 
+(instead of "root" as in Quick-Find). This fact indicates that the find process is not 
+guaranteed to be constant time, but determined by the input and may take time 
+proportional to data size in the worst case.
+
+[Quick Union Implementation](union_find/quick_union.c)
+
+***Analysis***: On average, the quick-union algorithm should be faster than the quick-find 
+algorithm, as it takes constant time to connect two components (not considering the time 
+spent for `find`ing). The time spent for `find`ing depends on the depth of the "Tree"s, 
+which is affected by the input content and order. Thus, it may, in the worst case, take 
+time linear to data size to `find` and `union` (because union calls `find`).

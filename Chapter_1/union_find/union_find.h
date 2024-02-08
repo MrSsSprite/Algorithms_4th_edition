@@ -1,6 +1,8 @@
 #ifndef UNION_FIND_H
 #define UNION_FIND_H
 
+#include <stddef.h>
+
 typedef struct union_find* UF;
 
 /**
