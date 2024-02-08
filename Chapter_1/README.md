@@ -127,7 +127,7 @@ At the end, the `DoublingStackOfStrings` holds merely one `it`.
   and prints the equivalent infix expression with the parentheses inserted. For example, 
   given the input:
 > ```terminal
-> 1 + 2 ) * 3 - 4 ) * 5- 6 ) ) )
+> 1 + 2 ) * 3 - 4 ) * 5 - 6 ) ) )
 > ```
 > your program should print
 > ```terminal
