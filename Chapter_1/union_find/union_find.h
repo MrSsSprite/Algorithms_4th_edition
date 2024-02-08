@@ -8,7 +8,7 @@ typedef struct union_find* UF;
 /**
  * @breif   create a new UF object
  * @param   data_size   total amount of sites
- * @return  the dynamically allocated UF obj
+ * @return  the dynamically allocated UF obj, NULL if failed
  */
 UF init_UF(size_t data_size);
 /**
@@ -31,8 +31,8 @@ size_t UF_find(UF this, size_t p);
  * @param   q       site 1
  * @return  0 for NOT connected; non-0 otherwise.
  */
-int UF_connected(UF this, size_t p, size_t q)
-{ return UF_find(p) == UF_find(q); }
+static inline int UF_connected(UF this, size_t p, size_t q)
+{ return UF_find(this, p) == UF_find(this, q); }
 /**
  * @brief   try to union two sites
  * @param   this    the UF obj

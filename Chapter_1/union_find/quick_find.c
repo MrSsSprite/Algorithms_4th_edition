@@ -2,7 +2,7 @@
 #include "base_structure.h"
 
 size_t UF_find(struct union_find *this, size_t p)
-{ return id[p]; }
+{ return this->id[p]; }
 
 int UF_union(struct union_find *this, size_t p, size_t q)
 {
@@ -15,7 +15,7 @@ int UF_union(struct union_find *this, size_t p, size_t q)
     if (this->id[i] == pID)
       this->id[i] = qID;
 
-  count--;
+  this->count--;
 
   return 1;
 }

@@ -146,9 +146,10 @@ Union Find (`UF`) programs are develop to recognize if two given points (or site
 are connected.
 
 ### Implementations
-The General Interface for Union Find
+The General Interface for Union Find: [union_find.h](union_find/union_find.h)
 
-[union_find.h](union_find/union_find.h)
+The [Driver file](union_find/driver.c) should be compiled with either **ONE** of the 
+implementations below (IMPORTANT: one but ONLY ONE, neither more nor less)
 
 #### Quick-Find
 One of the most intuitive implementation would be to construct an array so that every 
