@@ -147,6 +147,7 @@ are connected.
 
 ### Implementations
 The General Interface for Union Find
+
 [union_find.h](union_find/union_find.h)
 
 #### Quick-Find
@@ -154,7 +155,9 @@ One of the most intuitive implementation would be to construct an array so that 
 site can be related to an index and then ensure that all the sites in a component (a set 
 of sites connected together) holds the same index. This approach is called Quick-Find 
 since the `find` function always take constant time.
+
 [Quick Find Implementation](union_find/quick_find.c)
+| [base structure for both quick-find and quick-union](union_find/base_structure.h)
 
 ***Analysis***: The `find` operation takes merely constant time, while the time complexity
 of each `union` operation is proportional to data size (i.e., *O(n)*). Therefore, the 
@@ -170,6 +173,7 @@ guaranteed to be constant time, but determined by the input and may take time
 proportional to data size in the worst case.
 
 [Quick Union Implementation](union_find/quick_union.c)
+| [base structure for both quick-find and quick-union](union_find/base_structure.h)
 
 ***Analysis***: On average, the quick-union algorithm should be faster than the quick-find 
 algorithm, as it takes constant time to connect two components (not considering the time 
