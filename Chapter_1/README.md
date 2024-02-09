@@ -181,3 +181,26 @@ algorithm, as it takes constant time to connect two components (not considering 
 spent for `find`ing). The time spent for `find`ing depends on the depth of the "Tree"s, 
 which is affected by the input content and order. Thus, it may, in the worst case, take 
 time linear to data size to `find` and `union` (because union calls `find`).
+
+#### Weighted Quick-Union
+There is a simple improvement that can be applied to effectively avoid bad cases. In the 
+previous implementation, the algorithm always attach root of `p`, the first argument, to 
+that of `q`, the second argument. By using if statement to guarantee that it is *always* 
+the **smaller tree to be attached to the larger tree**, the algorithm can better contain 
+the growth rate of the depth of the "tree"s.
+
+This change requires the algorithm to keep track of the size of every tree. Accordingly, 
+we introduce another array used to store the amount of element "below" that site. This 
+method is named Weighted Quick-Union.
+
+[Weighted Quick Union Implementation](union_find/weighted_quick_union.c)
+
+#### Path Compression
+There is still one more simple optimization that can be applied to further optimize 
+Weighted Quick-Union: **Path Compression**.
+
+The implementation of path compression is plain, add one more loop in `find` so that 
+every site in the path (but not every site in the array) is linked directly to the root 
+of the component (or "tree"). This action effectively flatten the "tree"s.
+
+[Implementation](union_find/weighted_quick_union_with_pc.c)

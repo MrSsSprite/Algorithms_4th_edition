@@ -6,20 +6,32 @@ void consume_line(void);
 
 int main(int argc, char **argv)
 {
+  int mode;
   size_t data_size;
   size_t p, q;
   UF uf;
 
   if (argc != 2)
   {
-    fprintf(stderr, "Usage: %s data_size\n", argv[0]);
+    fprintf(stderr, "Usage: %s mode\n", argv[0]);
+    fputs("Mode:\n0: Not printing the connection process;\n", stderr);
+    fputs("1: Do print the connection process.\n", stderr);
     return 1;
   }
-  if (sscanf(argv[1], "%zd", &data_size) != 1)
+  if (sscanf(argv[1], "%d", &mode) != 1 || (mode != 0 && mode != 1))
   {
-    fputs("The first argument must be an integer.\n", stdout);
+    fputs("Invalid Mode.\n", stderr);
+    fputs("Mode:\n0: Not printing the connection process;\n", stderr);
+    fputs("1: Do print the connection process.\n", stderr);
     return 2;
   }
+
+  if (scanf("%zd", &data_size) != 1)
+  {
+    fputs("The first line must contain the data size.\n", stdout);
+    return 1;
+  }
+  consume_line();
 
   if ((uf = init_UF(data_size)) == NULL)
   {
@@ -37,7 +49,7 @@ int main(int argc, char **argv)
     }
     else if (q >= data_size || p >= data_size)
       fputs("Invalid Input.\n", stdout);
-    else if (UF_union(uf, p, q))
+    else if (UF_union(uf, p, q) && mode)
       printf("Connection built between %zd and %zd.\n", p, q);
 
     consume_line();
@@ -57,6 +69,12 @@ int main(int argc, char **argv)
     fputs("connected.\n", stdout);
     
     consume_line();
+  }
+
+  if (mode)
+  {
+    void print_sz(struct union_find *this);
+    print_sz(uf);
   }
 
   fputs("Cleaning memory...\n", stdout);
