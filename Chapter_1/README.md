@@ -134,6 +134,9 @@ At the end, the `DoublingStackOfStrings` holds merely one `it`.
 > ((1 + 2) * ((3 - 4) * (5 - 6)))
 > ```
 
+[program implementation](ex3p9/main.c) | [stack implementation](ex3p9/stack.c)
+| [stack interface](ex3p9/stack.h)
+
 ## 1.5. Case Study: Union Find
 ### Problem Statement: Dyamic Connectivity
 Given a set of connection commands, which build equivalence relations that are:

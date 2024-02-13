@@ -1,24 +1,42 @@
 /**
  * @file    stack.h
- * @brief   header for int Stack
+ * @brief   interfaces of Stack
  */
 #ifndef STACK_H
 #define STACK_H
 
+#include <stddef.h>
+
 typedef struct stack* Stack;
+union Stack_item { char op; char *string; };
+enum data_type { operator, expression };
 
 /**
- * @brief   get a new stack, which is initialized and dynamically allocated
- * @return  the Stack object, which is evaluated to 0 if failed, non-0 otherwise
- *          the Stack object also needs to be cleaned up by using clean_stack.
+ * @brief   initialize a new Stack obj
+ * @param   data_type   data_type stored in the Stack: operator or expression
+ * @return  the initialized Stack obj., which has to be cleaned up by calling stack_cleanup
  */
-Stack init_stack(void);
+Stack init_stack(enum data_type data_type);
 /**
- * @brief   push a value to the Stack
- * @param   this    the Stack object
- * @param   value   value to be pushed
+ * @brief   push an item to the stack
+ * @param   this    Stack obj
+ * @param   item    item to be pushed;
+ *                  for string, pointer is passed and take over control (NOT copied);
+ *                  for char, pointer to char is passed, and the char is COPIED
  * @return  0 for successful, non-0 otherwise
  */
-int push(Stack this, int value);
+int stack_push(Stack this, char *item);
+/**
+ * @brief   pop an item from the Stack
+ * @param   this    Stack obj
+ * @return  the poped item
+ */
+union Stack_item stack_pop(Stack this);
+/**
+ * @brief   clean up Stack, balance each init_stack call
+ * @param   this    Stack obj to be cleaned up
+ */
+void stack_cleanup(Stack this);
+size_t stack_count(Stack this);
 
 #endif
