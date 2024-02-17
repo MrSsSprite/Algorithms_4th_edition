@@ -157,11 +157,12 @@ char * combine_expression(const char *lhs, const char *rhs, char op)
     *iter++ = *rhs++;
 
   *iter++ = ' ';
-  *iter++ = op;
-  *iter++ = ' ';
 
   while (*lhs != '\0')
     *iter++ = *lhs++;
+
+  *iter++ = ' ';
+  *iter++ = op;
   
   *iter++ = ')';
 
