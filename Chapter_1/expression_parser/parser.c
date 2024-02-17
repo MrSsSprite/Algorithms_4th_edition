@@ -11,7 +11,10 @@ static enum
   SUCCESS = 0,
   MALLOC_ERR,
   INVALID_INPUT,
-} error_code;
+} error_code = 0;
+
+int exp_parser_error(void)
+{ return error_code; }
 
 struct stackSet { Stack expStack, opStack, ctStack; };
 
