@@ -200,7 +200,7 @@ static int _exptostr_postfix(struct expression *exp, struct _string *str)
         return 1;
       *str->cav++ = '(';
     }
-    if (_exptostr(exp->exp[0], str))
+    if (_exptostr_postfix(exp->exp[0], str))
       return 1;
     if (has_lower_precedence)
     {
@@ -229,7 +229,7 @@ static int _exptostr_postfix(struct expression *exp, struct _string *str)
         return 1;
       *str->cav++ = '(';
     }
-    if (_exptostr(exp->exp[1], str))
+    if (_exptostr_postfix(exp->exp[1], str))
       return 1;
     if (has_lower_precedence)
     {
