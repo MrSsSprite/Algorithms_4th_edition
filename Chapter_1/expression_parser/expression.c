@@ -1,6 +1,7 @@
 #include "expression.h"
 #include "parser.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -8,8 +9,8 @@ int get_op_precedence(char op);
 
 struct _string { char *st, *cav, *term; };
 inline static int _string_resize(struct _string *this, size_t new_cap);
-static int _exptostr(struct expression *exp, struct _string *str);
-static int _exptostr_postfix(struct expression *exp, struct _string *str);
+inline static int _exptostr(const struct expression *exp, struct _string *str);
+inline static int _exptostr_postfix(const struct expression *exp, struct _string *str);
 
 void cleanup_expression(struct expression *exp)
 {
@@ -76,6 +77,68 @@ char * expression_to_string_postfix(Expression exp)
   return ret.st;
 }
 
+long expression_evaluate_long(Expression exp)
+{
+  long lhs, rhs;
+  
+  if (exp->type == EXPRESSION)
+  {
+    lhs = expression_evaluate_long(exp->exp[0]);
+    rhs = expression_evaluate_long(exp->exp[1]);
+    switch (exp->op)
+    {
+    case '+':
+      return lhs + rhs;
+    case '-':
+      return lhs - rhs;
+    case '*':
+      return lhs * rhs;
+    case '/':
+      return lhs / rhs;
+    default:
+      return 0;
+    }
+  }
+  else
+  {
+    if (sscanf(exp->dig, "%ld", &lhs) != 1)
+      return 0;
+    else
+      return lhs;
+  }
+}
+
+double expression_evaluate_double(Expression exp)
+{
+  double lhs, rhs;
+  
+  if (exp->type == EXPRESSION)
+  {
+    lhs = expression_evaluate_long(exp->exp[0]);
+    rhs = expression_evaluate_long(exp->exp[1]);
+    switch (exp->op)
+    {
+    case '+':
+      return lhs + rhs;
+    case '-':
+      return lhs - rhs;
+    case '*':
+      return lhs * rhs;
+    case '/':
+      return lhs / rhs;
+    default:
+      return 0;
+    }
+  }
+  else
+  {
+    if (sscanf(exp->dig, "%lf", &lhs) != 1)
+      return 0;
+    else
+      return lhs;
+  }
+}
+
 inline static int _string_resize(struct _string *this, size_t new_cap)
 {
   char *temp;
@@ -102,158 +165,149 @@ inline static int _string_resize(struct _string *this, size_t new_cap)
 }
 
 inline static int _string_expand(struct _string *this)
-{ return _string_resize(this, this->st == NULL ? 3 : (this->term - this->st) * 2); }
+{ return _string_resize(this, this->st == NULL ? 1 : (this->term - this->st) * 2); }
 
-static int _exptostr(struct expression *exp, struct _string *str)
+inline static int _exptostr(const struct expression *exp, struct _string *str)
 {
-  char *iter;
-  int has_lower_precedence = 0;
+  int status;
 
   if (exp->type == EXPRESSION)
   {
-    // left expression
-    // check precedence of subexpression
+    int need_paren;
+
+    // concatenate lhs
     if (exp->exp[0]->type == EXPRESSION &&
         get_op_precedence(exp->exp[0]->op) < get_op_precedence(exp->op))
-      has_lower_precedence = 1;
+      need_paren = 1;
     else
-      has_lower_precedence = 0;
-    // print content
-    if (has_lower_precedence)
+      need_paren = 0;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = '(';
     }
-    if (_exptostr(exp->exp[0], str))
-      return 1;
-    if (has_lower_precedence)
+    if ((status = _exptostr(exp->exp[0], str)))
+      return status;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = ')';
     }
 
-    // operator
+    // concatenate operator
     while (str->term - str->cav < 3)
-      if (_string_expand(str))
-        return 1;
+      if ((status = _string_expand(str)))
+        return status;
     *str->cav++ = ' ';
     *str->cav++ = exp->op;
     *str->cav++ = ' ';
 
-    // right expression
-    // check precedence of subexpression
+    // concatenate rhs
     if (exp->exp[1]->type == EXPRESSION &&
         get_op_precedence(exp->exp[1]->op) <= get_op_precedence(exp->op))
-      has_lower_precedence = 1;
+      need_paren = 1;
     else
-      has_lower_precedence = 0;
-    // print content
-    if (has_lower_precedence)
+      need_paren = 0;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = '(';
     }
-    if (_exptostr(exp->exp[1], str))
-      return 1;
-    if (has_lower_precedence)
+    if ((status = _exptostr(exp->exp[1], str)))
+      return status;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = ')';
     }
   }
-  else
+  else  // exp->type == DIGIT
   {
-    while (str->term - str->cav < strlen(exp->dig))
-      if (_string_expand(str))
+    for (const char *iter = exp->dig; *iter != '\0'; iter++)
+    {
+      if (str->cav == str->term && _string_expand(str))
         return 1;
-
-    iter = exp->dig;
-    while (*iter != '\0')
-      *str->cav++ = *iter++;
+      *str->cav++ = *iter;
+    }
   }
 
   return 0;
 }
 
-static int _exptostr_postfix(struct expression *exp, struct _string *str)
+inline static int _exptostr_postfix(const struct expression *exp, struct _string *str)
 {
-  char *iter;
-  int has_lower_precedence = 0;
+  int status;
 
   if (exp->type == EXPRESSION)
   {
-    // left expression
-    // check precedence of subexpression
+    int need_paren;
+
+    // concatenate lhs
     if (exp->exp[0]->type == EXPRESSION &&
         get_op_precedence(exp->exp[0]->op) < get_op_precedence(exp->op))
-      has_lower_precedence = 1;
+      need_paren = 1;
     else
-      has_lower_precedence = 0;
-    // print content
-    if (has_lower_precedence)
+      need_paren = 0;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = '(';
     }
-    if (_exptostr_postfix(exp->exp[0], str))
-      return 1;
-    if (has_lower_precedence)
+    if ((status = _exptostr(exp->exp[0], str)))
+      return status;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = ')';
     }
 
-    // separate lhs and rhs
-    while (str->term - str->cav < 1)
-      if (_string_expand(str))
-        return 1;
+    // concatenate separate space
+    if (str->cav == str->term && _string_expand(str))
+      return 1;
     *str->cav++ = ' ';
 
-    // right expression
-    // check precedence of subexpression
+    // concatenate rhs
     if (exp->exp[1]->type == EXPRESSION &&
         get_op_precedence(exp->exp[1]->op) <= get_op_precedence(exp->op))
-      has_lower_precedence = 1;
+      need_paren = 1;
     else
-      has_lower_precedence = 0;
-    // print content
-    if (has_lower_precedence)
+      need_paren = 0;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = '(';
     }
-    if (_exptostr_postfix(exp->exp[1], str))
-      return 1;
-    if (has_lower_precedence)
+    if ((status = _exptostr(exp->exp[1], str)))
+      return status;
+    if (need_paren)
     {
-      if (str->cav == str->term && _string_expand(str))
-        return 1;
+      if (str->cav == str->term && ((status = _string_expand(str))))
+          return status;
       *str->cav++ = ')';
     }
 
-    // operator
+    // concatenate operator
     while (str->term - str->cav < 2)
-      if (_string_expand(str))
-        return 1;
+      if ((status = _string_expand(str)))
+        return status;
     *str->cav++ = ' ';
     *str->cav++ = exp->op;
   }
-  else
+  else  // exp->type == DIGIT
   {
-    while (str->term - str->cav < strlen(exp->dig))
-      if (_string_expand(str))
+    for (const char *iter = exp->dig; *iter != '\0'; iter++)
+    {
+      if (str->cav == str->term && _string_expand(str))
         return 1;
-
-    iter = exp->dig;
-    while (*iter != '\0')
-      *str->cav++ = *iter++;
+      *str->cav++ = *iter;
+    }
   }
 
   return 0;

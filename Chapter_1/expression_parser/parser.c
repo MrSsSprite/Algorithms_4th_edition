@@ -70,6 +70,9 @@ struct expression * expression_parser(const char *string)
       break;
     case '+':
     case '-':
+      // if expected to find a number
+      if (stack_count(stackSet->expStack) == stack_count(stackSet->opStack))
+        goto handle_digit;
     case '*':
     case '/':
       if (paren_flag)
@@ -102,6 +105,7 @@ struct expression * expression_parser(const char *string)
     default:
       if (isdigit(*iter))
       {
+handle_digit:
         temp_str = get_num(&iter);
         if (temp_str == NULL)
         {
@@ -179,7 +183,7 @@ static char * get_num(const char **strptr)
   if (string == NULL)
     return NULL;
 
-  while (isdigit(**strptr))
+  while (isdigit(**strptr) || **strptr == '.' || **strptr == '-')
   {
     if (cavity == terminal)
     {

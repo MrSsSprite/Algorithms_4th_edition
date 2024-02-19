@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "parser.h"
+#include "../parser.h"
 
 char * get_line(void);
 
@@ -20,15 +20,19 @@ int main(void)
 
   free(string);
 
+
   string = expression_to_string(exp);
   puts("Normal:");
   puts(string);
   free(string);
 
-  string = expression_to_string_postfix(exp);
-  puts("Postfix:");
-  puts(string);
-  free(string);
+   string = expression_to_string_postfix(exp);
+   puts("Postfix:");
+   puts(string);
+   free(string);
+
+  printf("Evaluated Result: %ld(long) or %lf(double)\n",
+         expression_evaluate_long(exp), expression_evaluate_double(exp));
 
   cleanup_expression(exp);
 
