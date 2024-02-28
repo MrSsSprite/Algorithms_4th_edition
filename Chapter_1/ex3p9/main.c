@@ -1,168 +1,204 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "stack.h"
 
-char * get_num(void);
-char * combine_expression(const char *lhs, const char *rhs, char op);
+inline static void stackSet_cleanup(Stack digStack, Stack opStack);
+inline static int evaluate_one(Stack digStack, Stack opStack);
+inline static char * get_num(void);
 
 int main(void)
 {
-  Stack opStack, expStack;
-  char *string[2], *temp;
+  Stack digStack, opStack;
   int ch;
+  char *string;
 
-  opStack = init_stack(operator);
-  if (opStack == NULL)
+  digStack = init_stack(ST_STR);
+  opStack = init_stack(ST_CH);
+  if (digStack == NULL || opStack == NULL)
   {
-    fputs("Failed to initialize opStack.\n", stderr);
-    return -1;
-  }
-  expStack = init_stack(expression);
-  if (expStack == NULL)
-  {
-    fputs("Failed to initialize expStack.\n", stderr);
-    stack_cleanup(opStack);
-    return -2;
+    stackSet_cleanup(digStack, opStack);
+    return 1;
   }
 
-  while ((ch = getchar()) != EOF && ch != '\n')
+  while (1)
   {
-    if (isdigit(ch))
+    switch (ch = getchar())
     {
-      ungetc(ch, stdin);
-      string[0] = get_num();
-      if (string[0] == NULL)
-      {
-        fputs("Failed to get_num.\n", stderr);
-        stack_cleanup(opStack);
-        stack_cleanup(expStack);
-        return -3;
-      }
-      stack_push(expStack, string[0]);
-    }
-    else switch (ch)
-    {
-    case ' ':
-    case '(':
-      continue;
+    case EOF:
+    case '\n':
+      goto end_of_input_loop;
     case '+':
     case '-':
+      if (stack_count(digStack) == stack_count(opStack))
+        goto handle_digit;
     case '*':
     case '/':
-      stack_push(opStack, (char*)&ch);
+      stack_push(opStack, &ch);
       break;
+    case '(':
+    case ' ':
+      continue;
     case ')':
-      string[0] = stack_pop(expStack).string;
-      string[1] = stack_pop(expStack).string;
-      ch = stack_pop(opStack).op;
-      if (string[0] == NULL || string[1] == NULL || ch == '\0')
+      if (evaluate_one(digStack, opStack))
       {
-        fputs("Fatal Parsing Error.\n", stderr);
-        stack_cleanup(opStack);
-        stack_cleanup(expStack);
-        return 1;
-      }
-      temp = combine_expression(string[0], string[1], ch);
-      if (temp == NULL)
-      {
-        fputs("Failed to combine_expression.\n", stderr);
-        stack_cleanup(opStack);
-        stack_cleanup(expStack);
+        stackSet_cleanup(digStack, opStack);
         return 2;
       }
-      free(string[0]);
-      free(string[1]);
-      stack_push(expStack, temp);
       break;
     default:
-      fputs("Invalid Symbol Detected and skipped.\n", stderr);
+      if (isdigit(ch))
+      {
+handle_digit:
+        ungetc(ch, stdin);
+        string = get_num();
+        if (string == NULL || stack_push(digStack, string))
+        {
+          stackSet_cleanup(digStack, opStack);
+          return 1;
+        }
+        break;
+      }
+
+      stackSet_cleanup(digStack, opStack);
+      return 2;
     }
   }
-  if (stack_count(opStack) != 0 || stack_count(expStack) != 1)
-    fputs("Invalid Format!\n", stdout);
-  else
+end_of_input_loop:
+
+  if (stack_count(opStack) != 0 || stack_count(digStack) != 1)
   {
-    temp = stack_pop(expStack).string;
-    puts(temp);
-    free(temp);
+    stackSet_cleanup(digStack, opStack);
+    return 2;
   }
 
-  stack_cleanup(opStack);
-  stack_cleanup(expStack);
+  string = stack_pop(digStack).dig;
+  puts(string);
+  free(string);
+
+  stackSet_cleanup(digStack, opStack);
+  return 0;
+}
+
+inline static void stackSet_cleanup(Stack digStack, Stack opStack)
+{
+  cleanup_stack(digStack);
+  cleanup_stack(opStack);
+}
+
+inline static int evaluate_one(Stack digStack, Stack opStack)
+{
+  char op;
+  char *lhs, *rhs, *res;
+  char *ptr;
+  const char *iter;
+
+  if (stack_count(digStack) < 2 || stack_count(opStack) < 1)
+    return 2;
+
+  op = stack_pop(opStack).op;
+  lhs = stack_pop(digStack).dig;
+  rhs = stack_pop(digStack).dig;
+
+  // () + \0
+  res = malloc(strlen(lhs) + strlen(rhs) + 6);
+  if (res == NULL)
+    return 1;
+  ptr = res;
+
+  *ptr++ = '(';
+  for (iter = rhs; *iter != '\0'; iter++)
+    *ptr++ = *iter;
+  *ptr++ = ' ';
+  *ptr++ = op;
+  *ptr++ = ' ';
+  for (iter = lhs; *iter != '\0'; iter++)
+    *ptr++ = *iter;
+  *ptr++ = ')';
+
+  free(lhs);
+  free(rhs);
+
+  stack_push(digStack, res);
 
   return 0;
 }
 
-char * get_num(void)
+inline static char * get_num(void)
 {
-  size_t cap = 0;
-  char *string = malloc(cap), *cavity = string, *terminal = string + cap;
+  size_t cap = 1;
+  char *st = malloc(cap), *cav = st, *term = st + cap;
   char *temp;
   int ch;
+  int encountered_dot = 0;
+  int has_sign = 0;
+  int in_dig = 0;
+  int is_valid = 1;
 
-  if (string == NULL)
+  if (st == NULL)
     return NULL;
 
-  while (isdigit(ch = getchar()))
+  while (1)
   {
-    if (cavity == terminal)
+    switch (ch = getchar())
     {
-      temp = realloc(string, cap * 2);
-      if (temp == NULL)
-      {
-        free(string);
-        return NULL;
-      }
-      string = temp;
-      cavity = temp + cap;
-      terminal = temp + (cap *= 2);
+      case '.':
+        if (encountered_dot)
+          is_valid = 0;
+        else
+          encountered_dot = 1;
+        break;
+      case '+':
+      case '-':
+        if (has_sign || in_dig)
+          is_valid = 0;
+        else
+          has_sign = 1;
+        break;
+      default:
+        if (!isdigit(ch))
+          is_valid = 0;
+        else
+          in_dig = 1;
     }
 
-    *cavity++ = ch;
+    if (is_valid)
+    {
+      if (cav == term)
+      {
+        temp = realloc(st, cap * 2);
+        if (temp == NULL)
+        {
+          free(st);
+          return NULL;
+        }
+        st = temp;
+        cav = st + cap;
+        term = st + (cap *= 2);
+      }
+
+      *cav++ = ch;
+    }
+    else
+      break;
   }
 
-  if (cavity == terminal)
+  ungetc(ch, stdin);
+
+  if (cav == term)
   {
-    temp = realloc(string, cap + 1);
+    temp = realloc(st, cap + 1);
     if (temp == NULL)
     {
-      free(string);
+      free(st);
       return NULL;
     }
-    string = temp;
-    cavity = temp + cap;
+    st = temp;
+    cav = st + cap;
   }
 
-  *cavity = '\0';
+  *cav = '\0';
 
-  return string;
-}
-
-char * combine_expression(const char *lhs, const char *rhs, char op)
-{
-  char *ret = malloc(strlen(lhs) + strlen(rhs) + 6);
-  char *iter = ret;
-
-  if (ret == NULL)
-    return NULL;
-
-  *iter++ = '(';
-
-  while (*rhs != '\0')
-    *iter++ = *rhs++;
-
-  *iter++ = ' ';
-  *iter++ = op;
-  *iter++ = ' ';
-
-  while (*lhs != '\0')
-    *iter++ = *lhs++;
-  
-  *iter++ = ')';
-
-  return ret;
+  return st;
 }

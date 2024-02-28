@@ -137,6 +137,12 @@ At the end, the `DoublingStackOfStrings` holds merely one `it`.
 [program implementation](ex3p9/main.c) | [stack implementation](ex3p9/stack.c)
 | [stack interface](ex3p9/stack.h)
 
+### Exercise 3.10.
+> Write a filter `InfixToPostfix` that converts an arithmetic expression from in-fix to 
+  postfix.
+[program implementation](ex3p10/main.c) | [stack implementation](ex3p10/stack.c)
+| [stack interface](ex3p10/stack.h)
+
 ## 1.5. Case Study: Union Find
 ### Problem Statement: Dyamic Connectivity
 Given a set of connection commands, which build equivalence relations that are:
