@@ -10,6 +10,7 @@ long expression_evaluate_long(Expression exp);
 double expression_evaluate_double(Expression exp);
 
 Expression expression_parser(const char *string);
+Expression expression_parser_postfix(const char *string);
 /**
  * @brief     return the error type of last expression parse run
  * @return    0: SUCCESS,

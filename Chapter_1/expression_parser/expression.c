@@ -258,7 +258,7 @@ inline static int _exptostr_postfix(const struct expression *exp, struct _string
           return status;
       *str->cav++ = '(';
     }
-    if ((status = _exptostr(exp->exp[0], str)))
+    if ((status = _exptostr_postfix(exp->exp[0], str)))
       return status;
     if (need_paren)
     {
@@ -284,7 +284,7 @@ inline static int _exptostr_postfix(const struct expression *exp, struct _string
           return status;
       *str->cav++ = '(';
     }
-    if ((status = _exptostr(exp->exp[1], str)))
+    if ((status = _exptostr_postfix(exp->exp[1], str)))
       return status;
     if (need_paren)
     {

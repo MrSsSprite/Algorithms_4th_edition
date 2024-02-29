@@ -22,7 +22,7 @@ static char * get_num(const char **strptr);
 static void cleanup_stackSet(struct stackSet *this);
 static struct stackSet * init_stackSet(void);
 
-static int evaluate_one(Stack expStack, Stack opStack);
+static int evaluate_one(Stack expStack, char op);
 int get_op_precedence(char op);
 
 struct expression * expression_parser(const char *string)
@@ -62,7 +62,7 @@ struct expression * expression_parser(const char *string)
     case ')':
       count = stack_pop(stackSet->ctStack).ul;
       while (stack_count(stackSet->expStack) > count)
-        if (evaluate_one(stackSet->expStack, stackSet->opStack))
+        if (evaluate_one(stackSet->expStack, stack_pop(stackSet->opStack).ch))
         {
           cleanup_stackSet(stackSet);
           return NULL;
@@ -88,7 +88,7 @@ struct expression * expression_parser(const char *string)
           if (stack_count(stackSet->ctStack) &&
               stack_count(stackSet->expStack) <= stack_first(stackSet->ctStack).ul)
             break;
-          if (evaluate_one(stackSet->expStack, stackSet->opStack))
+          if (evaluate_one(stackSet->expStack, stack_pop(stackSet->opStack).ch))
           {
             cleanup_stackSet(stackSet);
             return NULL;
@@ -122,6 +122,7 @@ handle_digit:
         }
         temp_exp->type = DIGIT;
         temp_exp->dig = temp_str;
+        temp_exp->op = '\0';
         if (stack_push(stackSet->expStack, temp_exp))
         {
           error_code = MALLOC_ERR;
@@ -146,7 +147,7 @@ handle_digit:
 end_read_loop:
 
   while (stack_count(stackSet->opStack))
-    if (evaluate_one(stackSet->expStack, stackSet->opStack))
+    if (evaluate_one(stackSet->expStack, stack_pop(stackSet->opStack).ch))
     {
       cleanup_stackSet(stackSet);
       return NULL;
@@ -174,31 +175,149 @@ end_read_loop:
   return temp_exp;
 }
 
+struct expression * expression_parser_postfix(const char *string)
+{
+  Stack expStack;
+  const char *iter = string;
+  char *temp_str;
+  struct expression *temp_exp;
+
+  while (1)
+  {
+    switch (*iter)
+    {
+    case ' ':
+    case '(':
+    case ')':
+      continue;
+    case '\0':
+      goto end_read_loop;
+    case '+':
+    case '-':
+      if (isdigit(*(iter + 1)))
+        goto handle_digit;
+    case '*':
+    case '/':
+      if (evaluate_one(expStack, *iter))
+      {
+        cleanup_stack(expStack);
+        return NULL;
+      }
+
+      break;
+    default:
+      if (isdigit(*iter))
+      {
+handle_digit:
+        temp_str = get_num(&iter);
+        if (temp_str == NULL)
+        {
+          error_code = MALLOC_ERR;
+          cleanup_stack(expStack);
+          return NULL;
+        }
+        temp_exp = malloc(sizeof (struct expression));
+        if (temp_exp == NULL)
+        {
+          error_code = MALLOC_ERR;
+          cleanup_stack(expStack);
+          return NULL;
+        }
+        temp_exp->type = DIGIT;
+        temp_exp->dig = temp_str;
+        temp_exp->op = '\0';
+        if (stack_push(expStack, temp_exp))
+        {
+          error_code = MALLOC_ERR;
+          cleanup_stack(expStack);
+          return NULL;
+        }
+
+        // get_num already lead iter to the next character, so don't increment
+        continue;
+      }
+      else
+      {
+        error_code = INVALID_INPUT;
+        cleanup_stack(expStack);
+        return NULL;
+      }
+      break;
+    }
+
+    iter++;
+  }
+end_read_loop:
+
+  if (stack_count(expStack) != 1)
+  {
+    error_code = INVALID_INPUT;
+    cleanup_stack(expStack);
+    return NULL;
+  }
+
+  temp_exp = stack_pop(expStack).exp;
+
+  cleanup_stack(expStack);
+  return temp_exp;
+}
+
 static char * get_num(const char **strptr)
 {
   size_t cap = 1;
   char *string = malloc(cap), *cavity = string, *terminal = string + cap;
   char *temp;
+  int encountered_dot = 0;
+  int has_sign = 0;
+  int in_dig = 0;
+  int is_valid = 1;
 
   if (string == NULL)
     return NULL;
 
-  while (isdigit(**strptr) || **strptr == '.' || **strptr == '-')
+  while (1)
   {
-    if (cavity == terminal)
+    switch (**strptr)
     {
-      temp = realloc(string, cap * 2);
-      if (temp == NULL)
-      {
-        free(string);
-        return NULL;
-      }
-      string = temp;
-      cavity = string + cap;
-      terminal = string + (cap *= 2);
+    case '.':
+      if (encountered_dot)
+        is_valid = 0;
+      else
+        encountered_dot = 1;
+      break;
+    case '+':
+    case '-':
+      if (has_sign || in_dig)
+        is_valid = 0;
+      else
+        has_sign = 1;
+      break;
+    default:
+      if (isdigit(**strptr))
+        in_dig = 1;
+      else
+        is_valid = 0;
     }
 
-    *cavity++ = *(*strptr)++;
+    if (is_valid)
+    {
+      if (cavity == terminal)
+      {
+        temp = realloc(string, cap * 2);
+        if (temp == NULL)
+        {
+          free(string);
+          return NULL;
+        }
+        string = temp;
+        cavity = string + cap;
+        terminal = string + (cap *= 2);
+      }
+
+      *cavity++ = *(*strptr)++;
+    }
+    else
+      break;
   }
 
   if (cavity == terminal)
@@ -246,7 +365,7 @@ static struct stackSet * init_stackSet(void)
   return ret;
 }
 
-static int evaluate_one(Stack expStack, Stack opStack)
+static int evaluate_one(Stack expStack, char op)
 {
   struct expression *res = malloc(sizeof (struct expression));
 
@@ -255,7 +374,7 @@ static int evaluate_one(Stack expStack, Stack opStack)
     error_code = MALLOC_ERR;
     return 1;
   }
-  if (stack_count(opStack) == 0 || stack_count(expStack) < 2)
+  if (stack_count(expStack) < 2)
   {
     error_code = INVALID_INPUT;
     return 1;
@@ -267,7 +386,7 @@ static int evaluate_one(Stack expStack, Stack opStack)
   res->exp[1] = stack_pop(expStack).exp;
   // left-hand-side
   res->exp[0] = stack_pop(expStack).exp;
-  res->op = stack_pop(opStack).ch;
+  res->op = op;
 
   stack_push(expStack, res);
 
