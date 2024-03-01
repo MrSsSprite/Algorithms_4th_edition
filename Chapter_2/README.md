@@ -389,4 +389,76 @@ ensure that the heap condition is satisfied everywhere. We refer to this process
 
 ***Bottom-up Reheapify (swim).*** If the heap order is violated because a node's key 
 becoms *larger* than that node's parent's key, then we can make progrress toward fixing 
-the violation by exchanging the node with it parent.
+the violation by exchanging the node with it parent until it reach a parent that has 
+higher key value, or the root.
+
+***Top-down Reheapify (sink).*** If the heap order is violated because a node's key 
+becomes *smaller* than one or both of that node's children's keys, then we can fix the 
+violation by exchanging the node with the *larger* of its two children until both chilren 
+are smaller or equal to the node, or reaching the bottom.
+
+***Insert.*** Add the new key at the end of the array, increment the size of the heap, and 
+then `swim` up through the heap with that key to restore the heap condition.
+
+***Remove the maximum.*** We take the largest key off the top, put the item from the end 
+of the heap at the top, decrement the size of the heap, and then sink down through the 
+heap with that key to restore the heap condition.
+
+#### Improvements
+***Multiway Heaps.*** It is not difficult to modity our code to build heaps based on an 
+array representation of complete heap-ordered *ternary* trees. However, there is a 
+tradeoff between the lower cost from the reduced tree height ($log_{d}N$) and the higher 
+cost of finding the largest of the *d* children at each node. This tradeoff is dependent 
+on details of the implementation and the expected relative frequency of operations.
+
+### Heapsort
+We can use any priority queue to develop a sorting method. We insert all the items to be 
+sorted into a minimum-origented priority queue, then repeatedly use *remove the minimum* 
+to remove them all in order.
+
+Using priority queue represented as an unordered array in this way corresponds to doing a 
+selection sort; using an ordered array corresponds to doing an insertion sort. What 
+sorting method do we get if we use a heap? It's a classic elegant sorting algorithm known 
+as *heapsort.
+
+Heapsort breaks into two phases:
+1. **heap construction**
+    - where we reorganize the original array into a heap
+2. **sortdown**
+    - where we pull the items out of the heap in decresing order to build the sorted 
+        result
+
+To sort the array in-place, we abandon the notion of hiding the representation of the 
+priority queue and use `swim` and `sink` directly.
+
+#### Heap construction
+A simple method is to proceed from left to right through the array, using `swim` to 
+ensure that the items to the left of the scanning pointer make up a heap-ordered complete 
+tree, like successive priority-queue insertions.
+
+A clever method that is much more efficient is to proceed from right to left, using `sink`
+to make subheaps as we go. Every position in the array is the root of a small subheap; 
+`sink` works for such subheaps, as well. If the children of a node are heaps, then calling 
+`sink` on that node makes the subtree rooted at the parent a heap. This process 
+establishes the heap order inductively.
+
+> The scan starts halfway back through the array because we can skip the subheaps of size 
+  \1. The scanf ends at position 1, when we finish building the heap with one call to 
+  `sink`
+
+#### Sortdown
+Most the work during heapsort is done during the second phase, where we remove the 
+largest remaining item from the heap and put it into the array position vacated as the 
+heap shrinks. This process is a bit like selection sort (selecting the items in 
+decreasing order instead of increasing order), but it uses many fewer compare because the 
+heap provides a much more efficient way to find the largest item in the unsorted part.
+
+*Sink to the bottom, then swim* is a simple method that can improve the efficiency of 
+heapsort. Most items reinserted into the heap during sortdown go all the way to the 
+bottom. Accodingly, we can save time by avoiding the check for whether the item has reach 
+its position, simply promoting the larger of the two children until the bottom is reached, 
+then moving back up the heap to the proper position. This idea cuts the number of compare 
+a factor of 2 asymptotically--close to the number used by mergesort (for a 
+randomly-ordered array).
+> This method is useful in practice only when the cost of compare is relatively high (for 
+  example, when we are sorting items with strings or other types of long keys.)
