@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "elem_sorts.h"
 #include "mergesort.h"
+#include "quicksort.h"
 
 int ul_cmp(const void *lhs, const void *rhs)
 { return *(const unsigned long*)lhs - *(const unsigned long*)rhs; }
@@ -14,7 +15,7 @@ void consume_line(FILE *fp);
 #define sorter_function \
 /* Modify the name below to determine
    the sorter function */\
-  BU_merge_sort
+  quick_sort 
 
 int main(int argc, char **argv)
 {
