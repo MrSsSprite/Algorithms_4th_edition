@@ -418,6 +418,85 @@ unsigned int max(list_node *first)
 | [doubly-linked list interface](ex3p31/doublyll.h)
 | [driver](ex3p31/driver.c)
 
+### Creative Problems
+
+#### Exercise 3.32: *Steque*.
+> A *stack*-ended *queue* or ***steque*** is a data type that supports *push*, *pop*, and 
+  *enqueue*. Articulate an API for this ADT. Develop a *link-list*-based implementation.
+
+[Steque Interface](ex3p32/steque.h) | [Steque Implementation](ex3p32/steque.c)
+| [driver](ex3p32/driver.c)
+
+#### Exercise 3.33: *Deque*.
+> A double-ended *queue* or *deque* (pronounced "deck") is like a stack or a queue but 
+  supports adding and removing items at both ends. A deque stores a collection of items 
+  and supports the following API:
+> | return | name      | description |
+> | ------ | --------- | ----------- |
+> |   N/A  | Deque     | Create an Deque Object |
+> |  bool  | isEmpty   | check if the deque is empty |
+> |   int  | size      | the number of items in the deque |
+> |  void  | pushLeft  | add an item to the left end |
+> |  void  | pushRight | add an item to the right end |
+> |  item  | popLeft   | remove an item from the left end |
+> |  item  | popRight  | remove an item from the right end |
+>
+> Write a class **Deque** that uses doubly-linked list to implement this API and a class 
+  **ResizingArrayDeque** that uses a resizing array.
+
+The doubly-linked list implementation of [exercise 3.31](#exercise-331) includes 
+basically all of the APIs above.
+
+## 1.4. Analysis of Algorithms
+
+### Exercises
+
+#### Exercise 4.1.
+> Show that the number of different triples that can be chosen from $N$ items is precisely 
+  $N (N - 1)(N - 2)/6$. Hint : Use mathematical induction.
+
+To prove that the number of different triples that can be chosen from $N$ items is 
+precisely $\frac {N (N - 1)(N - 2)}{6}$, we can employ a mathematical induction.
+
+***Base Case:***
+
+For $N = 3$, the smallest case where a triple can be formed, there is exactly *one* triple 
+that can be chosen. The formula yields:
+$$\frac{3 (3 - 1) (3 - 2)}{6} = \frac{3\cdot 2\cdot 1}{6} = 1$$
+This aligns with the actual number, thus confirming that the equation stands for the base 
+case.
+
+***Inductive Step:***
+
+Assume that for some $k \geq 3$, the formula holds true, i.e., the number of different 
+triples that can be chosen from $k$ items is $\frac {k (k - 1)(k - 2)}{6}$.
+
+If we can prove that, based on the above assumption, the formula also holds for $k + 1$, 
+which means the number of different triples that can be chosen from $k + 1$ items is 
+$\frac {(k + 1) k (k - 1)}{6}$, we can prove that the formula holds for any integer 
+greater than or equal to $3$ inductively from the base case.
+
+When we add an ${(k + 1)}^{th}$ to the set of $k$ items, this item can form a triple with 
+any *pair* from the original $k$ items. There are $\binom{k}{2}$ such pairs, which 
+translates to
+$$ \binom{k}{2} = \frac{k (k - 1)}{2} $$
+
+Now, by adding this to our assumed number of triple for $k$, we get the total number of 
+triples for a set of $k + 1$ items:
+$$ \frac{k (k - 1)(k - 2)}{6} + \frac{k (k - 1)}{2} $$
+
+Then, add these two fractions by finding a common denominator:
+$$ \frac{k(k-1)(k-2) + 3k(k-1)}{6} $$
+
+Distribute $k (k - 1)$ in the numerator:
+$$ \frac{k (k - 1) (k - 2 + 3)}{6} $$
+
+We get the exact formula that we want to prove:
+$$ \frac{k(k - 1) (k + 1)}{6} \equiv \frac {(k + 1) k (k - 1)}{6} $$
+
+Therefore, by the principle of mathematical induction, the formula holds true for all 
+$N \geq 3$.
+
 ## 1.5. Case Study: Union Find
 ### Problem Statement: Dyamic Connectivity
 Given a set of connection commands, which build equivalence relations that are:
@@ -488,3 +567,4 @@ every site in the path (but not every site in the array) is linked directly to t
 of the component (or "tree"). This action effectively flatten the "tree"s.
 
 [Implementation](union_find/weighted_quick_union_with_pc.c)
+
