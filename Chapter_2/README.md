@@ -43,7 +43,7 @@ smallest remaining item.
 
 #### Analysis
 **Running Time is Insensitive to Content**: Each iteration traverse to the end of the 
-sequence and compare smallest with each element. This process is not affected by neither  
+sequence and compare smallest with each element. This process is affected by neither  
 content of the array nor order of it.
 
 **Data movement is Linear to Array Size**: Exchange only happen in the outer iteration. 
