@@ -447,6 +447,46 @@ unsigned int max(list_node *first)
 The doubly-linked list implementation of [exercise 3.31](#exercise-331) includes 
 basically all of the APIs above.
 
+Resizing Array Implementation: [Deque Interface](ex3p33/deque_arr.h)
+| [Deque Implementation](ex3p33/deque_arr.c) | [Driver](ex3p33/driver.c)
+
+#### Exercise 3.34: *Random Bag*.
+> A *random bag* stores a collection of items and supports the following API:
+> | return |     name    | Description |
+> | ------ | ----------- | ----------- |
+> | None   | `RandomBag` | create an empty random bag |
+> | Bool   | `isEmpty`   | is the bag empty? |
+> |  int   | `size`      | number of items in the bag |
+> | void   | `add`       | add an item |
+>
+> Write a class `RandomBag` that implements this API. Note that this API is the same as 
+  for `Bag`, except for the adjective *random*, which indicates that the iteration should 
+  provide the items in *random* order (all N! permutations equally likely, for each 
+  iterator). *Hint*: Put the items in an array and randomize their order in the iterator's 
+  constructor.
+
+[RandomBag Implmentation](ex3p34/random_bag.c) | [RandomBag Interface](ex3p34/random_bag.h)
+| [Driver](ex3p34/driver.c)
+
+#### Exercise 3.35: *Random Queue*.
+> A *random queue* stores a collection of items and supports the following API:
+> | return |      name     | Description |
+> | ------ | ------------- | ----------- |
+> |  N/A   | `RandomQueue` | Create an empty random queue |
+> |  bool  | `isEmpty`     | is the queue empty? |
+> |  void  | `enqueue`     | add an item |
+> |  Item  | `dequeue`     | remove and return a random item |
+> |  Item  | `sample`      | return a random item, but do NOT remove |
+>
+> Write a class `RandomQueue` that implements this API. *Hint*: Use an array 
+  representation (with resizing). To remove an item, swap one at a random position 
+  (including the last) with the one at the last position. Then delete and return the last 
+  object, as in `ResizingArrayStack`. Write a client that deals bride hands (13 cards 
+  each) using `RandomQueue`.
+
+[RandomQueue Implementation](ex3p35/RandomQueue.c) | [RandomQueue Interface](ex3p35/RandomQueue.h)
+| [Driver](ex3p35/driver.c)
+
 ## 1.4. Analysis of Algorithms
 
 ### Exercises
