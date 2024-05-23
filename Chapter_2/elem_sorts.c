@@ -54,10 +54,11 @@ void shell_sort(void *first, void *const last, size_t elem_size,
   char *range_ed, *sorted_ed, *iter, *prev;
   void *temp = malloc(elem_size);
   size_t h = 1, arr_sz = (last - first) / elem_size;
-  while (h < arr_sz / 3)
-    h = 3 * h + 1;
+
   if (temp == NULL)
     return;
+  while (h < arr_sz / 3)
+    h = 3 * h + 1;
 
   while (h >= 1)
   {
@@ -75,4 +76,6 @@ void shell_sort(void *first, void *const last, size_t elem_size,
 
     h /= 3;
   }
+
+  free(temp);
 }

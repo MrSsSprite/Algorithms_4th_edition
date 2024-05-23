@@ -94,8 +94,23 @@ is close to it's final position.
 #### $h$ Sequence
 Shellsort typically $h$-sort for a sequence of $h$ values, which must end in 1.
 There is a relatively simple but rather effective sequence, which is actually adopted in 
-the my implementation. That is a sequence of decreasing values $\frac{1}{2} \times (3^k - 1)$, 
+my implementation. That is a sequence of decreasing values $\frac{1}{2} \times (3^k - 1)$, 
 starting at the largest increment less than $N/3$ and decreasing to $1$.
+
+### Exercises
+
+#### Exercise 1.13: *Deck Sort*.
+> Explain how you would put a deck of cards in order by suit (in the order spades, 
+  hearts, clubs, diamonds) and by rank within each suit, with the restriction that the 
+  cards must be laid out face down in a row, and the only allowed operations are to check 
+  the values of two cards and to exchange two cards (keeping them face down).
+
+To sort such a deck, using only the given operations, you can follow a process similar to 
+a modified version of any of the elementary sorting algorithms. A code demonstration is 
+shown below:
+
+[Deck sort demonstration](ex1p13/driver.c) | [card object interface](ex1p13/card.h)
+| [card obj. method](ex1p13/card.c)
 
 ## 2.2. Mergesort
 As the name suggests, merge sorts are based on a simple operation kown as *merging*: 
