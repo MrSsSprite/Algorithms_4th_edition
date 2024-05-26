@@ -97,55 +97,7 @@ There is a relatively simple but rather effective sequence, which is actually ad
 my implementation. That is a sequence of decreasing values $\frac{1}{2} \times (3^k - 1)$, 
 starting at the largest increment less than $N/3$ and decreasing to $1$.
 
-### Exercises
-
-#### Exercise 1.13: *Deck Sort*.
-> Explain how you would put a deck of cards in order by suit (in the order spades, 
-  hearts, clubs, diamonds) and by rank within each suit, with the restriction that the 
-  cards must be laid out face down in a row, and the only allowed operations are:
-> 1. to check the values of two cards, and 
-> 2. to exchange two cards (keeping them face down).
-
-To sort such a deck, using only the given operations, you can follow a process similar to 
-a modified version of any of the elementary sorting algorithms. Demonstration in C is 
-shown below:
-
-[Deck sort demonstration](ex1p13to14/ex1p13.c) | [card object interface](ex1p13to14/card.h)
-| [card obj. methods](ex1p13to14/card.c)
-
-#### Exercise 1.14: *Dequeue Sort*.
-> Explain how you would sort a deck of cards, with the restriction that the only allowed 
-  operations are:
-> 1. to look at the values of the top two cards,
-> 2. to exchange the top two cards, and
-> 3. to move the top card to the bottom of the deck.
-
-We can approach this problem by using a variant of bubble sort, where we repeatedly move 
-the target unsorted card to the bottom of the deck through a series of comparisons and 
-swaps. Steps to take:
-
-1. **Identify the Largest Card and Move it to the Bottom:**
-    - Repeat the following process for each pass through the deck:
-        - Look at the top two cards.
-        - If the top card is larger than the second card, exchange them.
-        - Move the top card to the bottom of the deck.
-        - Repeat until the largest card is found.
-        - Move the largest card to the bottom.
-2. **Reduce the Problem Size:**
-    - After each pass, the largest card is correctly placed at the bottom of the deck.
-    - Exclude the last card, which is now sorted, from the next pass.
-    - Repeat the process for the remaining unsorted cards.
-3. **Repeat until Fully Sorted:**
-    - Continue the passes until all cards are sorted.
-
-Demonstration in C:
-
-[Deck sort demonstration](ex1p13to14/ex1p14/driver.c)
-| [card object interface](ex1p13to14/card.h) | [card obj. methods](ex1p13to14/card.c)
-
-Considering that it would be inefficient to implement the "move to bottom" operation for 
-array data structure, a [variant version of queue](ex1p13to14/ex1p14/queue.h)
-([Implementation](ex1p13to14/ex1p14/queue.c)) is applied.
+### [Exercises](EXERCISES.md#2-1-elementary-sorts)
 
 ## 2.2. Mergesort
 As the name suggests, merge sorts are based on a simple operation kown as *merging*: 
