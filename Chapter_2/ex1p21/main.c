@@ -21,6 +21,7 @@ void transaction_arr_print(Transaction_arr *this);
 int main(int argc, char **argv)
 {
   FILE *infile;
+  char c;
   Transaction temp;
   Transaction_arr transaction_list;
 
@@ -43,7 +44,18 @@ int main(int argc, char **argv)
     if (fscanf(infile, "%d,%u,%d,%u",
                &temp.date.month, &temp.date.day, 
                &temp.date.year, &temp.amount) != 4)
+    {
+      switch(getc(infile))
+      {
+        case '\n':
+          continue;
+        case EOF:
+          goto finish_reading_infile;
+        default:
+          break;
+      }
       fprintf(stderr, "Failed to parse line %zu\n", i + 1);
+    }
     else
       if (transaction_arr_add(&transaction_list, &temp))
       {
@@ -55,6 +67,7 @@ int main(int argc, char **argv)
     // consume rest of the line
     fscanf(infile, "%*[^\n]\n");
   }
+finish_reading_infile:
 
   fputs("Loaded Transactions: ", stdout);
   transaction_arr_print(&transaction_list);
