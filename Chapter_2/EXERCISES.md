@@ -87,3 +87,11 @@ format of input data is the shipping dates represented in order: "month,day,year
 (one per line). For testing purpose, one set of [test input](ex1p15/test_input.csv) is 
 given. Besides **all of the files with ".c" extension in the same directory**, 
 [main function](ex1p15/main.c) should be compiled with [elem_sorts.c](elem_sorts.c).
+
+## Exercise 1.21: *Comparable Transactions*.
+> Write your implementation of `Transaction`, which should include at least date and 
+  amount, and write a method that keeps `Transaction` in order by amount.
+
+### C Implementation
+[transaction definition & methods](ex1p21/transaction.h) | [driver](ex1p21/main.c)
+| [test input file](ex1p21/test_input.csv)
